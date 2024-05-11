@@ -51,7 +51,10 @@ void lihatAplikasi(int &jumlahAplikasi, int index, string role, string status, i
 void menuPembeli(int &jumlahAkun, int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahTransaksi);
 
 
-void enter() {
+void enter(bool ignore = 0) {
+    if(ignore){
+        cin.ignore();
+    }
     cout << "Tekan Enter untuk melanjutkan...";
     cin.get();
     system("cls || clear");
@@ -232,20 +235,25 @@ void registrasi(int &jumlahAkun) {
     cout << "1. Penjual" << endl;
     cout << "2. Pembeli" << endl;
     getInputint("Role : ", &role, "1");
+    while (role < 1 || role > 2) {
+        cout << "Role tidak valid" << endl;
+        getInputint("Role : ", &role, "1");
+    }
     Akun[jumlahAkun].role = role;
     cin.ignore();
     getlineInput("Username : ", &username);
-    Akun[jumlahAkun].username = username;
+    getlineInput("Password : ", &password);
     for (int i = 0; i < jumlahAkun; i++) {
         if (Akun[i].username == username) {
             cout << "Username sudah digunakan silahkan input ulang!" << endl;
             registrasi(jumlahAkun);
+            return;
         }
     }
-    getlineInput("Password : ", &password);
+    Akun[jumlahAkun].username = username;
     Akun[jumlahAkun].password = password;
     Akun[jumlahAkun].saldo = 0.00;
-    Akun[jumlahAkun].id = 0;
+    Akun[jumlahAkun].id = (jumlahAkun == 0) ? 1 : Akun[jumlahAkun - 1].id + 1;
     Akun[jumlahAkun].status = false;
     jumlahAkun++;
     saveAkun(jumlahAkun);
@@ -255,6 +263,9 @@ void registrasi(int &jumlahAkun) {
 int login(int &jumlahAkun) {
     string username, password;
     cin.ignore();
+    cout << "====================\n";
+    cout << "   Halaman Login"<<endl;
+    cout << "====================\n";
     getlineInput("Username : ", &username);
     getlineInput("Password : ", &password);
     for (int i = 0; i < jumlahAkun; i++) {
@@ -263,11 +274,11 @@ int login(int &jumlahAkun) {
                 cout << "Login Berhasil" << endl;
                 return i;
             } else {
-                cout << "Username atau Password salah" << endl;
+                cout << "Akun belum dikonfirmasi" << endl;
                 return -1;
             }
         }
-    }cout << "Akun tidak ditemukan" << endl;
+    }cout << "Username atau password salah !!" << endl;
     return -1;
 }
 
@@ -275,17 +286,24 @@ void displayMainMenu(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview, in
     int pilihan;
     int index;
     do{
-        cout << "1. Registrasi" << endl;
-        cout << "2. Login" << endl;
-        cout << "3. Exit" << endl;
+        cout << "========================\n";
+        cout << "       Trade Trove" << endl;
+        cout << "========================\n";
+        cout << "      1. Registrasi" << endl;
+        cout << "      2. Login" << endl;
+        cout << "      3. Exit" << endl;
+        cout << "========================\n";
         getInputint("Pilihan : ", &pilihan, "1");
+        system("cls || clear");
         switch (pilihan)
         {
         case 1:
             registrasi(jumlahAkun);
+            enter();
             break;
         case 2:
             index = login(jumlahAkun);
+            enter();
             if (index != -1) {
                 switch (Akun[index].role)
                 {
@@ -314,82 +332,105 @@ void displayMainMenu(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview, in
 }
 
 void lihatRequestAkun(int &jumlahAkun){
-    cout << "Request Akun" << endl;
+    cout << "       Request Akun" << endl;
+    cout << "===========================\n";
+    bool found = false;
     for (int i = 0; i < jumlahAkun; i++) {
         if (Akun[i].status == false) {
-            cout << "Username : " << Akun[i].username;
+            cout << "Username : " << Akun[i].username<< endl;
+            cout << "ID : " << Akun[i].id << endl;
             switch (Akun[i].role)
             {
             case 1:
-                cout << " Role : Penjual";
+                cout << "Role : Penjual"<<endl;
                 break;
             case 2:
-                cout << " Role : Pembeli";
+                cout << "Role : Pembeli"<<endl;
                 break;
             default:
-                cout << " Role tidak ditemukan";
+                cout << "Role tidak ditemukan"<<endl;
                 break;
             }
-            cout << " (Belum dikonfirmasi)" << endl;
+            cout << "Status : Belum dikonfirmasi" << endl;
+            cout <<"________________________________________\n";
+            found = true;
         }
+    }if(!found){
+        cout << "Tidak ada request akun" << endl;
     }
 }
 
 void konfirmasiAkun(int &jumlahAkun){
-    string username;
+    int idAkun;
     cin.ignore();
-    getlineInput("Masukan username untuk mengkonfirmasi : ", &username);
-    for (int i = 0; i < jumlahAkun; i++) {
-        if (Akun[i].username == username) {
+    getInputint("Masukan Id Akun yang ingin dikonfirmasi (Ketik 0 untuk keluar): ", &idAkun, "2");
+    if (idAkun == 0) {
+        cout << "Keluar dari menu konfirmasi akun"<<endl;
+        return;
+    }for (int i = 0; i < jumlahAkun; i++) {
+        if (Akun[i].id == idAkun && Akun[i].status == false) {
             Akun[i].status = true;
-            getInputint("Masukan ID : ", &Akun[i].id, "2");
-            cout << "Akun berhasil dikonfirmasi" << endl;
             saveAkun(jumlahAkun);
+            cout << "Akun berhasil dikonfirmasi" << endl;
             return;
         }
-    }cout << "Akun tidak ditemukan" << endl;
+    }cout << "Akun tidak ditemukan atau sudah dikonfirmasi sebelumnya" << endl;
 }
 
 void lihatPengguna(int &jumlahAkun){
-    cout << "Pengguna" << endl;
+    cout << "      Pengguna" << endl;
+    cout << "====================\n";
+    if (jumlahAkun == 0) {
+        cout << "Belum ada pengguna" << endl;
+        return;
+    }
     for (int i = 1 ; i < jumlahAkun; i++) {
-        cout << i << " Username : " << Akun[i].username << " ID : " << Akun[i].id ;
+        cout << i << " Username : " << Akun[i].username<< endl;
+        cout << " ID : " << Akun[i].id << endl;
         switch (Akun[i].role)
         {
         case 1:
-            cout << " Role : Penjual";
+            cout << " Role : Penjual"<<endl;
             break;
         case 2:
-            cout << " Role : Pembeli";
+            cout << " Role : Pembeli"<<endl;
             break;
         case 3:
-            cout << " Role : Admin";
+            cout << " Role : Admin"<<endl;
             break;
         default:
-            cout << " Role tidak ditemukan";
+            cout << " Role tidak ditemukan"<<endl;
             break;
-        }
-        if (Akun[i].status == true) {
-            cout << " (Sudah dikonfirmasi)" << endl;
+        }if (Akun[i].status) {
+            cout << " Status : Sudah dikonfirmasi" << endl;
         } else {
-            cout << " (Belum dikonfirmasi)" << endl;
-        }
+            cout << " Status : Belum dikonfirmasi" << endl;
+        }cout << "________________________________________\n";
     }
 }
 
 void hapusAkun(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview){
     int id;
-    getInputint("Masukkan ID akun yang ingin dihapus : ", &id, "1");
+    getInputint("Masukkan ID akun yang ingin dihapus (Ketik 0 untuk keluar): ", &id, "2");
+    if (id == 0) {
+        cout << "Keluar dari menu hapus akun"<<endl;
+        return;
+    }
     bool found = false;
     for (int i = 0; i < jumlahAkun; i++) {
         if (Akun[i].id == id) {
+            string username = Akun[i].username;
             for (int j = i; j < jumlahAkun - 1; j++) {
                 Akun[j] = Akun[j + 1];
             }
             jumlahAkun--;
+            for (int j = i; j < jumlahAkun; j++) {
+                Akun[j].id = j + 1;
+            }
             saveAkun(jumlahAkun);
-            for (int j = 0; j < jumlahAplikasi; j++) {
-                if (Aplikasi[j].seller == Akun[i].username) {
+            for (int j = 0; j < jumlahAplikasi;) {
+                if (Aplikasi[j].seller == username) {
+                    int idAplikasi = Aplikasi[j].id;
                     for (int k = j; k < jumlahAplikasi - 1; k++) {
                         Aplikasi[k] = Aplikasi[k + 1];
                     }
@@ -397,8 +438,8 @@ void hapusAkun(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview){
                     for (int k = j; k < jumlahAplikasi; k++) {
                         Aplikasi[k].id = k + 1;
                     }
-                    for (int k = 0; k < jumlahReview; k++) {
-                        if (daftarReview[k].idAplikasi == Aplikasi[j].id) {
+                    for (int k = 0; k < jumlahReview;) {
+                        if (daftarReview[k].idAplikasi == idAplikasi) {
                             for (int l = k; l < jumlahReview - 1; l++) {
                                 daftarReview[l] = daftarReview[l + 1];
                             }
@@ -406,14 +447,19 @@ void hapusAkun(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview){
                             for (int l = k; l < jumlahReview; l++) {
                                 daftarReview[l].id = l + 1;
                             }
+                        } else {
+                            k++;
                         }
                     }
+                } else {
+                    j++;
                 }
             }
             saveAplikasi(jumlahAplikasi);
             saveReview(jumlahReview);
-            for (int j = 0; j < jumlahReview; j++) {
-                if (daftarReview[j].usernamePembeli == Akun[i].username) {
+
+            for (int j = 0; j < jumlahReview;) {
+                if (daftarReview[j].usernamePembeli == username) {
                     for (int k = j; k < jumlahReview - 1; k++) {
                         daftarReview[k] = daftarReview[k + 1];
                     }
@@ -421,22 +467,30 @@ void hapusAkun(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview){
                     for (int k = j; k < jumlahReview; k++) {
                         daftarReview[k].id = k + 1;
                     }
+                } else {
+                    j++;
                 }
             }
             saveReview(jumlahReview);
+
             cout << "Akun berhasil dihapus" << endl;
             found = true;
             return;
         }
-    }if(!found){
-            cout << "Akun tidak ditemukan" << endl;
+    }
+    if (!found) {
+        cout << "Akun tidak ditemukan" << endl;
     }
 }
 
+
 void konfirmasiAplikasi(int &jumlahAplikasi) {
     int appId;
-    cout << "Masukkan ID aplikasi untuk dikonfirmasi: ";
-    cin >> appId;
+    getInputint("Masukkan ID aplikasi yang ingin dikonfirmasi (Ketik 0 untuk keluar): ", &appId, "2");
+    if (appId == 0) {
+        cout << "Keluar dari menu konfirmasi aplikasi"<<endl;
+        return;
+    }
     bool found = false;
     for (int i = 0; i < jumlahAplikasi; i++) {
         if (Aplikasi[i].id == appId && !Aplikasi[i].status) {
@@ -455,33 +509,44 @@ void konfirmasiAplikasi(int &jumlahAplikasi) {
 void menuAdmin(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview){
     int pilihan;
     do{
-        cout << "Menu Admin" << endl;
-        cout << "1. Konfirmasi Akun Pengguna" << endl;
-        cout << "2. Konfirmasi Aplikasi Penjual" << endl;
-        cout << "3. Lihat Pengguna" << endl;
-        cout << "4. Lihat Aplikasi Penjual" << endl;
-        cout << "5. Hapus Akun Pengguna" << endl;
-        cout << "6. Logout" << endl;
+        cout << "===========================================\n";
+        cout << "              Menu Admin" << endl;
+        cout << "===========================================\n";
+        cout << "       1. Konfirmasi Akun Pengguna" << endl;
+        cout << "       2. Konfirmasi Aplikasi Penjual" << endl;
+        cout << "       3. Lihat Pengguna" << endl;
+        cout << "       4. Lihat Aplikasi Penjual" << endl;
+        cout << "       5. Hapus Akun Pengguna" << endl;
+        cout << "       6. Logout" << endl;
+        cout << "===========================================\n";
         getInputint("Pilihan : ", &pilihan, "1");
+        system("cls || clear");
         switch (pilihan){
             case 1:
                 lihatRequestAkun(jumlahAkun);
                 konfirmasiAkun(jumlahAkun);
+                enter(1);
                 break;
             case 2:
-                cout << "Konfirmasi Aplikasi Penjual" << endl;
+                cout << "=====================================\n";
+                cout << "   Konfirmasi Aplikasi Penjual" << endl;
+                cout << "=====================================\n";
                 lihatAplikasi(jumlahAplikasi, 2, "admin", "unconfirm", jumlahReview);
                 konfirmasiAplikasi(jumlahAplikasi);
+                enter(1);
                 break;
             case 3:
                 lihatPengguna(jumlahAkun);
+                enter(1);
                 break;
             case 4:
                 lihatAplikasi(jumlahAplikasi, 2, "admin", "all", jumlahReview);
+                enter(1);
                 break;
             case 5:
                 lihatPengguna(jumlahAkun);
                 hapusAkun(jumlahAkun, jumlahAplikasi, jumlahReview);
+                enter(1);
                 break;
             case 6:
                 cout << "Logout" << endl;
@@ -494,6 +559,9 @@ void menuAdmin(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview){
 }
 
 void tambahAplikasi(int &jumlahAplikasi, int index){
+    cout << "=====================================\n";
+    cout << "       Tambah Aplikasi" << endl;
+    cout << "=====================================\n";
     string nama;
     double harga;
     cin.ignore();
@@ -510,59 +578,76 @@ void tambahAplikasi(int &jumlahAplikasi, int index){
     cout << "Aplikasi berhasil ditambahkan! Menunggu Konfirmasi" << endl;
 }
 
+void coutAplikasi(int id, string name, double harga, string seller, bool status , string role){
+    cout << "ID : " << id << endl;
+    cout << "Nama Aplikasi : " << name << endl;
+    cout << "Harga : " << harga << endl;
+    cout << "Seller : " << seller << endl;
+    if (role == "penjual"){
+        if (status) {
+            cout << "Status : Sudah dikonfirmasi" << endl;
+        } else {
+            cout << "Status : Belum dikonfirmasi" << endl;
+        }cout << "________________________________________\n";
+    }
+}
+
 void lihatAplikasi(int &jumlahAplikasi, int index, string role, string status, int &jumlahReview){
-    cout << "Aplikasi Penjual" << endl;
+    cout << "      List Aplikasi" << endl;
+    cout << "========================\n";
+    bool found = false;
     if (role == "admin" && status == "unconfirm"){
         for (int i = 0; i < jumlahAplikasi; i++) {
             if (Aplikasi[i].status == false) {
-                cout <<"ID : " << Aplikasi[i].id << " Nama Aplikasi : " << Aplikasi[i].name << " Harga : " << Aplikasi[i].harga << " Seller : " << Aplikasi[i].seller;
-                cout << " (Belom dikonfirmasi)" << endl;
+                coutAplikasi(Aplikasi[i].id, Aplikasi[i].name, Aplikasi[i].harga, Aplikasi[i].seller, Aplikasi[i].status,"penjual");
+                found = true;
             }
         }
     }else if (role == "admin" && status == "all"){
         for (int i = 0; i < jumlahAplikasi; i++) {
-            cout <<"ID : " << Aplikasi[i].id << " Nama Barang : " << Aplikasi[i].name << " Harga : " << Aplikasi[i].harga << " Seller : " << Aplikasi[i].seller;
-            if (Aplikasi[i].status == true) {
-                cout << " (Sudah dikonfirmasi)" << endl;
-            } else {
-                cout << " (Belum dikonfirmasi)" << endl;
-            }
+            coutAplikasi(Aplikasi[i].id, Aplikasi[i].name, Aplikasi[i].harga, Aplikasi[i].seller, Aplikasi[i].status,"penjual");
+            found = true;
         }
     }else if(role == "pembeli" && status == "confirm"){
         for (int i = 0; i < jumlahAplikasi; i++) {
             if (Aplikasi[i].status == true) {
-                cout <<"ID : " << Aplikasi[i].id << " Nama Barang : " << Aplikasi[i].name << " Harga : " << Aplikasi[i].harga << " Seller : " << Aplikasi[i].seller << endl;
-                cout << "Review : " << endl;
+                coutAplikasi(Aplikasi[i].id, Aplikasi[i].name, Aplikasi[i].harga, Aplikasi[i].seller, Aplikasi[i].status,"pembeli");
+                found = true;
                 bool foundReview = false;
+                cout << "         Review" << endl;
+                cout << "========================\n";
                 for (int j = 0; j < jumlahReview; j++) {
                     if (daftarReview[j].idAplikasi == Aplikasi[i].id) {
-                        cout << "Rating : " << daftarReview[j].rating << endl;
                         cout << "Pembeli : " << daftarReview[j].usernamePembeli << endl;
+                        cout << "Rating : " << daftarReview[j].rating << endl;
                         cout << "Review : " << daftarReview[j].review << endl;
+                        cout << "========================\n";
                         foundReview = true;
                     }
                 }if (!foundReview){
                     cout << "Belum ada review untuk aplikasi ini. " << endl;
-                }
+                }cout << "________________________________________\n";
             }
         }
     }else{
         for (int i = 0; i < jumlahAplikasi; i++) {
             if (Aplikasi[i].seller == Akun[index].username) {
-                cout <<"ID : " << Aplikasi[i].id << " Nama Barang : " << Aplikasi[i].name << " Harga : " << Aplikasi[i].harga << " Seller : " << Aplikasi[i].seller;
-                if (Aplikasi[i].status == true) {
-                    cout << " (Sudah dikonfirmasi)" << endl;
-                } else {
-                    cout << " (Belum dikonfirmasi)" << endl;
-                }
+                coutAplikasi(Aplikasi[i].id, Aplikasi[i].name, Aplikasi[i].harga, Aplikasi[i].seller, Aplikasi[i].status,"penjual");
+                found = true;
             }
         }
+    }if(!found){
+        cout << "Belum ada aplikasi" << endl;
     }
 }
 
 void editAplikasi(int &jumlahAplikasi, int index) {
     int appId;
-    getInputint("Masukkan ID aplikasi untuk diedit: ", &appId, "1");
+    getInputint("Masukkan ID aplikasi untuk diedit (Ketik 0 untuk keluar): ", &appId, "2");
+    if (appId == 0) {
+        cout << "Keluar dari menu edit aplikasi"<<endl;
+        return;
+    }
     bool found = false;
     for (int i = 0; i < jumlahAplikasi; i++) {
         if (Aplikasi[i].id == appId && Aplikasi[i].seller == Akun[index].username) {
@@ -587,7 +672,11 @@ void editAplikasi(int &jumlahAplikasi, int index) {
 
 void hapusAplikasi(int &jumlahAplikasi, int index) {
     int appId;
-    getInputint("Masukkan ID aplikasi untuk dihapus: ", &appId, "1");
+    getInputint("Masukkan ID aplikasi untuk dihapus (Ketik 0 untuk keluar): ", &appId, "2");
+    if (appId == 0) {
+        cout << "Keluar dari menu hapus aplikasi"<<endl;
+        return;
+    }
     bool found = false;
     for (int i = 0; i < jumlahAplikasi; i++) {
         if (Aplikasi[i].id == appId && Aplikasi[i].seller == Akun[index].username) {
@@ -611,84 +700,123 @@ void hapusAplikasi(int &jumlahAplikasi, int index) {
 
 void konfirmasiPenjualan(int &jumlahAplikasi, int index, int &jumlahTransaksi, int &jumlahAkun){
     int idApp;
-    getInputint("Masukkan ID aplikasi yang ingin dikonfirmasi: ", &idApp, "1");
-    bool found = false;
-    int status;
-    getInputint("Masukkan status transaksi (1 = success, 2 = failed): ", &status, "2");
-    if (status < 1 || status > 2) {
-        cout << "Status transaksi tidak valid!" << endl;
+    getInputint("Masukkan ID aplikasi yang ingin dikonfirmasi (Ketik 0 untuk keluar): ", &idApp, "2");
+    if (idApp == 0) {
+        cout << "Keluar dari menu konfirmasi penjualan"<<endl;
         return;
-    }else {
-        for (int i = 0 ; i < jumlahTransaksi; i++) {
-            if (daftarTransaksi[i].id == idApp && daftarTransaksi[i].aplikasi.seller == Akun[index].username && daftarTransaksi[i].status == 0) {
-                if (status == 1) {
-                    Akun[index].saldo += daftarTransaksi[i].aplikasi.harga;
-                    daftarTransaksi[i].status = 1;
-                    cout << "Transaksi berhasil!" << endl;
-                } else {
-                    daftarTransaksi[i].status = 2;
-                    for (int j = 0; j < jumlahAkun; j++) {
-                        if (daftarTransaksi[i].idPembeli == Akun[j].id) {
-                            Akun[j].saldo += daftarTransaksi[i].aplikasi.harga;
-                            break;
-                        }
-                    }
-                    cout << "Transaksi gagal!" << endl;
-                }
-            }
-        }saveTransaksi(jumlahTransaksi);
     }
-
+    bool found = false;
+    int status;    
+    for (int i = 0 ; i < jumlahTransaksi; i++) {
+        if (daftarTransaksi[i].id == idApp && daftarTransaksi[i].aplikasi.seller == Akun[index].username && daftarTransaksi[i].status == 0) {
+            found = true;
+            getInputint("Masukkan status transaksi (1 = success, 2 = failed): ", &status, "1");
+            while (status < 1 || status > 2) {
+                cout << "Status transaksi tidak valid!" << endl;
+                getInputint("Masukkan status transaksi (1 = success, 2 = failed): ", &status, "1");
+            }
+            if (status == 1) {
+                Akun[index].saldo += daftarTransaksi[i].aplikasi.harga;
+                daftarTransaksi[i].status = 1;
+                cout << "Transaksi berhasil!" << endl;
+            } else {
+                daftarTransaksi[i].status = 2;
+                for (int j = 0; j < jumlahAkun; j++) {
+                    if (daftarTransaksi[i].idPembeli == Akun[j].id) {
+                        Akun[j].saldo += daftarTransaksi[i].aplikasi.harga;
+                        break;
+                    }
+                }
+                cout << "Transaksi gagal!" << endl;
+            }
+        }
+    }saveTransaksi(jumlahTransaksi);
+    saveAkun(jumlahAkun);
+    if (!found){
+        cout << "ID transaksi tidak ditemukan atau sudah dikonfirmasi sebelumnya!" << endl;
+    }
 }
 
 void daftarTransaksiAplikasi(int &jumlahTransaksi, int index, string role){
-    cout << "Daftar Transaksi Aplikasi" << endl;
+    cout << "      Daftar Transaksi Aplikasi" << endl;
+    cout << "=====================================\n";
+    bool found = false;
     for (int i = 0; i < jumlahTransaksi; i++) {
         if (daftarTransaksi[i].aplikasi.seller == Akun[index].username && daftarTransaksi[i].status == 0 && role == "penjual") {
-            cout << "ID Transaksi : " << daftarTransaksi[i].id << " Nama Pembeli : " << daftarTransaksi[i].usernamePembeli << " Nama Aplikasi : " << daftarTransaksi[i].aplikasi.name << " Status : " << "Pending" << endl;
+            cout <<"ID Transaksi : " << daftarTransaksi[i].id <<endl;
+            cout <<"Nama Pembeli : " << daftarTransaksi[i].usernamePembeli << endl;
+            cout <<"Nama Aplikasi : " << daftarTransaksi[i].aplikasi.name <<endl;
+            cout <<"Status : " << "Pending" << endl;
+            cout <<"________________________________________\n";
+            found = true;
         }else if(daftarTransaksi[i].idPembeli == Akun[index].id && role == "pembeli"){
-            cout << "ID Aplikasi : " << daftarTransaksi[i].id << " Nama Penjual : " << daftarTransaksi[i].aplikasi.seller << " Nama Aplikasi : " << daftarTransaksi[i].aplikasi.name << " Status : ";
+            cout <<"ID Transaksi : " << daftarTransaksi[i].id <<endl;
+            cout <<"Nama Penjual : " << daftarTransaksi[i].aplikasi.seller << endl;
+            cout <<"Nama Aplikasi : " << daftarTransaksi[i].aplikasi.name <<endl;
+            cout <<"Status : ";
             if (daftarTransaksi[i].status == 0) {
                 cout << "Pending" << endl;
             } else if (daftarTransaksi[i].status == 1) {
                 cout << "Success" << endl;
             } else {
                 cout << "Failed" << endl;
-            }
+            }cout <<"________________________________________\n";
+            found = true;
         }
+    }if(!found){
+        cout << "Belum ada transaksi" << endl;
     }
 }
 
 void menuPenjual(int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahTransaksi, int &jumlahAkun){
     int pilihan;
     do{
-        cout << "Menu Penjual" << endl;
-        cout << "1. Lihat Aplikasi" << endl;
-        cout << "2. Tambah Aplikasi" << endl;
-        cout << "3. Edit Aplikasi" << endl;
-        cout << "4. Hapus Aplikasi" << endl;
-        cout << "5. Konfirmasi Penjualan" << endl;
-        cout << "6. Logout" << endl;
+        cout << "=======================================\n";
+        cout << "           Menu Penjual" << endl;
+        cout << "=======================================\n";
+        cout << "       1. Lihat Aplikasi" << endl;
+        cout << "       2. Tambah Aplikasi" << endl;
+        cout << "       3. Edit Aplikasi" << endl;
+        cout << "       4. Hapus Aplikasi" << endl;
+        cout << "       5. Konfirmasi Penjualan" << endl;
+        cout << "       6. Logout" << endl;
+        cout << "=======================================\n";
         cout << "Total Saldo : $" << Akun[index].saldo << endl;
+        cout << "=======================================\n";
         getInputint("Pilihan : ", &pilihan, "1");
+        system("cls || clear");
         switch (pilihan){
             case 1:
                 lihatAplikasi(jumlahAplikasi, index, "penjual", "all", jumlahReview);
+                enter(1);
                 break;
             case 2:
                 tambahAplikasi(jumlahAplikasi, index);
+                enter(1);
                 break;
             case 3:
+                cout << "=====================================\n";
+                cout << "         Edit Aplikasi" << endl;
+                cout << "=====================================\n";
                 lihatAplikasi(jumlahAplikasi, index, "penjual", "all", jumlahReview);
                 editAplikasi(jumlahAplikasi, index);
+                enter(1);
                 break;
             case 4:
+                cout << "=====================================\n";
+                cout << "         Hapus Aplikasi" << endl;
+                cout << "=====================================\n";
                 lihatAplikasi(jumlahAplikasi, index, "penjual", "all", jumlahReview);
                 hapusAplikasi(jumlahAplikasi, index);
+                enter(1);
                 break;
             case 5:
+                cout << "=====================================\n";
+                cout << "   Konfirmasi Penjualan Aplikasi" << endl;
+                cout << "=====================================\n";
                 daftarTransaksiAplikasi(jumlahTransaksi, index, "penjual");
                 konfirmasiPenjualan(jumlahAplikasi, index, jumlahTransaksi, jumlahAkun);
+                enter(1);
                 break;
             case 6:
                 cout << "Logout" << endl;
@@ -701,6 +829,9 @@ void menuPenjual(int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahT
 }
 
 void isiSaldo(int &jumlahAkun, int index){
+    cout << "===================================\n";
+    cout << "       Halaman Isi Saldo" << endl;
+    cout << "===================================\n";
     double saldo;
     cout << "Masukkan jumlah saldo yang ingin diisi : $";
     cin >> saldo;
@@ -711,8 +842,14 @@ void isiSaldo(int &jumlahAkun, int index){
 
 void beliAplikasi(int &jumlahAplikasi, int index, int &jumlahTransaksi, int &jumlahAkun){
     int appId;
-    cout << "Masukkan ID aplikasi yang ingin dibeli: ";
-    cin >> appId;
+    if (jumlahAplikasi == 0) {
+        return;
+    }
+    getInputint("Masukkan ID aplikasi yang ingin dibeli (Ketik 0 untuk keluar): ", &appId, "2");
+    if (appId == 0) {
+        cout << "Keluar dari menu beli aplikasi"<<endl;
+        return;
+    }
     bool found = false;
     for (int i = 0; i < jumlahAplikasi; i++) {
         if (Aplikasi[i].id == appId && Aplikasi[i].status) {
@@ -744,7 +881,11 @@ void beliAplikasi(int &jumlahAplikasi, int index, int &jumlahTransaksi, int &jum
 
 void tambahReview(int &jumlahReview, int &jumlahTransaksi, int index){
     int idApp;
-    getInputint("Masukkan ID aplikasi yang ingin direview: ", &idApp, "1");
+    getInputint("Masukkan ID aplikasi yang ingin direview (Ketik 0 untuk keluar): ", &idApp, "2");
+    if (idApp == 0) {
+        cout << "Keluar dari menu review aplikasi"<<endl;
+        return;
+    }
     bool found = false;
     for (int i = 0; i < jumlahTransaksi ; i++){
         if (daftarTransaksi[i].id == idApp && daftarTransaksi[i].status == 1 && daftarTransaksi[i].idPembeli == Akun[index].id){
@@ -753,6 +894,11 @@ void tambahReview(int &jumlahReview, int &jumlahTransaksi, int index){
             cin.ignore();
             getlineInput("Masukkan review: ", &review);
             getInputint("Masukkan rating (1-5): ", &rating, "1");
+            while (rating < 1 || rating > 5) {
+                cout << "Rating tidak valid!" << endl;
+                getInputint("Masukkan rating (1-5): ", &rating, "1");
+                system("cls || clear");
+            }
             daftarReview[jumlahReview].id = (jumlahReview == 0) ? 1 : daftarReview[jumlahReview - 1].id + 1;
             daftarReview[jumlahReview].idAplikasi = daftarTransaksi[i].aplikasi.id;
             daftarReview[jumlahReview].usernamePembeli = Akun[index].username;
@@ -772,32 +918,48 @@ void tambahReview(int &jumlahReview, int &jumlahTransaksi, int index){
 void menuPembeli(int &jumlahAkun,int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahTransaksi){
     int pilihan;
     do{
-        cout << "Menu Pembeli" << endl;
-        cout << "1. Lihat Aplikasi" << endl;
-        cout << "2. Isi Saldo" << endl;
-        cout << "3. Beli Aplikasi" << endl;
-        cout << "4. Riwayat Transaksi" << endl;
-        cout << "5. Review Aplikasi " << endl;
-        cout << "6. Logout" << endl;
+        cout << "===================================\n";
+        cout << "           Menu Pembeli" << endl;
+        cout << "===================================\n";
+        cout << "       1. Lihat Aplikasi" << endl;
+        cout << "       2. Isi Saldo" << endl;
+        cout << "       3. Beli Aplikasi" << endl;
+        cout << "       4. Riwayat Transaksi" << endl;
+        cout << "       5. Review Aplikasi " << endl;
+        cout << "       6. Logout" << endl;
+        cout << "===================================\n";
         cout << "Total Saldo : $" << Akun[index].saldo << endl;
+        cout << "===================================\n";
         getInputint("Pilihan : ", &pilihan, "1");
+        system("cls || clear");
         switch (pilihan){
             case 1:
                 lihatAplikasi(jumlahAplikasi, index, "pembeli", "confirm", jumlahReview);
+                enter(1);
                 break;
             case 2:
                 isiSaldo(jumlahAkun, index);
+                enter(1);
                 break;
             case 3:
+                cout << "=====================================\n";
+                cout << "         Beli Aplikasi" << endl;
+                cout << "=====================================\n";
                 lihatAplikasi(jumlahAplikasi, index, "pembeli", "confirm", jumlahReview);
                 beliAplikasi(jumlahAplikasi, index, jumlahTransaksi, jumlahAkun);
+                enter(1);
                 break;
             case 4:
                 daftarTransaksiAplikasi(jumlahTransaksi, index, "pembeli"); 
+                enter(1);
                 break;
             case 5:
+                cout << "=====================================\n";
+                cout << "         Review Aplikasi" << endl;
+                cout << "=====================================\n";
                 daftarTransaksiAplikasi(jumlahTransaksi, index, "pembeli"); 
                 tambahReview(jumlahReview, jumlahTransaksi, index);
+                enter(1);
                 break;
             case 6:
                 cout << "Logout" << endl;
@@ -814,10 +976,6 @@ int main() {
     int jumlahAplikasi = bacaAplikasi();
     int jumlahReview = bacaReview();
     int jumlahTransaksi = bacaTransaksi();
-    // cout << "Jumlah Akun : " << jumlahAkun << endl;
-    // cout << "Jumlah Aplikasi : " << jumlahAplikasi << endl;
-    // cout << "Jumlah Review : " << jumlahReview << endl;
-    // cout << "Jumlah Transaksi : " << jumlahTransaksi << endl;
     displayMainMenu(jumlahAkun, jumlahAplikasi, jumlahReview, jumlahTransaksi);
     return 0;
 }
