@@ -53,7 +53,8 @@ void menuAdmin(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview);
 void menuPenjual(int &jumlahAkun, int index, int &jumlahAplikasi, int &jumlahReview, int &jumlahTransaksi);
 void lihatAplikasi(int &jumlahAplikasi, int index, string role, string status, int &jumlahReview);
 void menuPembeli(int &jumlahAkun, int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahTransaksi);
-void menuSorting(int &jumlahAplikasi, int index);
+void sortAplikasi(string role, int &jumlahAplikasi, string sortBy, string mode, int &jumlahReview, int index, int &jumlahTransaksi, int &jumlahAkun);
+void menuSorting(int &jumlahAplikasi, int jumlahReview, int index, string role, int &jumlahTransaksi, int &jumlahAkun);
 
 void enter(bool ignore = 0)
 {
@@ -972,7 +973,8 @@ void menuPenjual(int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahT
         cout << "       3. Edit Aplikasi" << endl;
         cout << "       4. Hapus Aplikasi" << endl;
         cout << "       5. Konfirmasi Penjualan" << endl;
-        cout << "       6. Logout" << endl;
+        cout << "       6. Sorting Aplikasi" << endl;
+        cout << "       7. Logout" << endl;
         cout << "=======================================\n";
         cout << "Total Saldo : $" << Akun[index].saldo << endl;
         cout << "=======================================\n";
@@ -1013,13 +1015,17 @@ void menuPenjual(int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahT
             enter(1);
             break;
         case 6:
+            menuSorting(jumlahAplikasi, jumlahReview, index, "penjual", jumlahTransaksi, jumlahAkun);
+            enter(1);
+            break;
+        case 7:
             cout << "Logout" << endl;
             break;
         default:
             cout << "Pilihan tidak ditemukan" << endl;
             break;
         }
-    } while (pilihan != 6);
+    } while (pilihan != 7);
 }
 
 void isiSaldo(int &jumlahAkun, int index)
@@ -1189,6 +1195,28 @@ void sortAplikasi(string role, int &jumlahAplikasi, string sortBy, string mode, 
     {
         lihatAplikasi(jumlahAplikasi, index, role, "confirm", jumlahReview);
         beliAplikasi(jumlahAplikasi, index, jumlahTransaksi, jumlahAkun);
+    }
+    else if (role == "penjual")
+    {
+        lihatAplikasi(jumlahAplikasi, index, role, "all", jumlahReview);
+        int pilihan;
+        cout << "Edit == 1 || Hapus == 2 || Keluar == 3" << endl;
+        getInputint("Pilihan : ", &pilihan, "1");
+        switch (pilihan)
+        {
+        case 1:
+            editAplikasi(jumlahAplikasi, index);
+            break;
+        case 2:
+            hapusAplikasi(jumlahAplikasi, index);
+            break;
+        case 3:
+            cout << "Keluar dari menu sorting" << endl;
+            break;
+        default:
+            cout << "Pilihan tidak ditemukan" << endl;
+            break;
+        }
     }
 }
 
