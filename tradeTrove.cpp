@@ -869,7 +869,7 @@ void hapusAplikasi(int &jumlahAplikasi, int index)
 void konfirmasiPenjualan(int &jumlahAplikasi, int index, int &jumlahTransaksi, int &jumlahAkun)
 {
     int idApp;
-    getInputint("Masukkan ID aplikasi yang ingin dikonfirmasi (Ketik 0 untuk keluar): ", &idApp, "2");
+    getInputint("Masukkan ID transaksi yang ingin dikonfirmasi (Ketik 0 untuk keluar): ", &idApp, "2");
     if (idApp == 0)
     {
         cout << "Keluar dari menu konfirmasi penjualan" << endl;
@@ -1024,7 +1024,9 @@ void menuPenjual(int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahT
             enter(1);
             break;
         case 7:
-            cout << "Searching Aplikasi" << endl;
+            cout << "=======================================\n";
+            cout << "       Searching Aplikasi" << endl;
+            cout << "=======================================\n";
             sortAplikasi("all", jumlahAplikasi, "name", "asc", jumlahReview, index, jumlahTransaksi, jumlahAkun);
             cin.ignore();
             getlineInput("Masukkan nama aplikasi yang ingin dicari : ", &searchApp);
@@ -1346,7 +1348,9 @@ void menuSorting(int &jumlahAplikasi, int jumlahReview, int index, string role, 
 
 void menuPembeli(int &jumlahAkun, int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahTransaksi)
 {
-    int pilihan;
+    int pilihan, idx, pilihanOption;
+    string searchApp;
+
     do
     {
         cout << "===================================\n";
@@ -1358,7 +1362,8 @@ void menuPembeli(int &jumlahAkun, int &jumlahAplikasi, int index, int &jumlahRev
         cout << "       4. Riwayat Transaksi" << endl;
         cout << "       5. Review Aplikasi " << endl;
         cout << "       6. Sorting Aplikasi " << endl;
-        cout << "       7. Logout" << endl;
+        cout << "       7. Searching Aplikasi " << endl;
+        cout << "       8. Logout" << endl;
         cout << "===================================\n";
         cout << "Total Saldo : $" << Akun[index].saldo << endl;
         cout << "===================================\n";
@@ -1399,13 +1404,45 @@ void menuPembeli(int &jumlahAkun, int &jumlahAplikasi, int index, int &jumlahRev
             enter(1);
             break;
         case 7:
+            cout << "=======================================\n";
+            cout << "       Searching Aplikasi" << endl;
+            cout << "=======================================\n";
+            sortAplikasi("all", jumlahAplikasi, "name", "asc", jumlahReview, index, jumlahTransaksi, jumlahAkun);
+            cin.ignore();
+            getlineInput("Masukkan nama aplikasi yang ingin dicari : ", &searchApp);
+            idx = binarySearchApp(Aplikasi, jumlahAplikasi, searchApp);
+            if (idx != -1)
+            {
+                coutAplikasi(Aplikasi[idx].id, Aplikasi[idx].name, Aplikasi[idx].harga, Aplikasi[idx].seller, Aplikasi[idx].status, "penjual");
+                cout << "Beli == 1 || Keluar == 2" << endl;
+                getInputint("Pilihan: ", &pilihanOption, "1");
+                switch (pilihanOption)
+                {
+                case 1:
+                    beliAplikasi(jumlahAplikasi, index, jumlahTransaksi, jumlahAkun);
+                    break;
+                case 2:
+                    cout << "Keluar dari menu searching aplikasi" << endl;
+                    break;
+                default:
+                    cout << "Pilihan tidak ditemukan" << endl;
+                    break;
+                }
+            }
+            else
+            {
+                cout << "Aplikasi tidak ditemukan!" << endl;
+            }
+            enter(1);
+            break;
+        case 8:
             cout << "Logout" << endl;
             break;
         default:
             cout << "Pilihan tidak ditemukan" << endl;
             break;
         }
-    } while (pilihan != 7);
+    } while (pilihan != 8);
 }
 
 int main()
