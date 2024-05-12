@@ -55,6 +55,7 @@ void lihatAplikasi(int &jumlahAplikasi, int index, string role, string status, i
 void menuPembeli(int &jumlahAkun, int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahTransaksi);
 void sortAplikasi(string role, int &jumlahAplikasi, string sortBy, string mode, int &jumlahReview, int index, int &jumlahTransaksi, int &jumlahAkun);
 void menuSorting(int &jumlahAplikasi, int jumlahReview, int index, string role, int &jumlahTransaksi, int &jumlahAkun);
+int binarySearchApp(Item data[], int jumlahData, string cari);
 
 void enter(bool ignore = 0)
 {
@@ -962,7 +963,10 @@ void daftarTransaksiAplikasi(int &jumlahTransaksi, int index, string role)
 
 void menuPenjual(int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahTransaksi, int &jumlahAkun)
 {
-    int pilihan;
+    int pilihan, idx, pilihanOption;
+    string searchApp;
+    bool found = false;
+
     do
     {
         cout << "=======================================\n";
@@ -974,7 +978,8 @@ void menuPenjual(int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahT
         cout << "       4. Hapus Aplikasi" << endl;
         cout << "       5. Konfirmasi Penjualan" << endl;
         cout << "       6. Sorting Aplikasi" << endl;
-        cout << "       7. Logout" << endl;
+        cout << "       7. Searching Aplikasi" << endl;
+        cout << "       8. Logout" << endl;
         cout << "=======================================\n";
         cout << "Total Saldo : $" << Akun[index].saldo << endl;
         cout << "=======================================\n";
@@ -1019,13 +1024,53 @@ void menuPenjual(int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahT
             enter(1);
             break;
         case 7:
+            cout << "Searching Aplikasi" << endl;
+            sortAplikasi("all", jumlahAplikasi, "name", "asc", jumlahReview, index, jumlahTransaksi, jumlahAkun);
+            cin.ignore();
+            getlineInput("Masukkan nama aplikasi yang ingin dicari : ", &searchApp);
+            idx = binarySearchApp(Aplikasi, jumlahAplikasi, searchApp);
+            if (idx != -1)
+            {
+                if (Aplikasi[idx].seller == Akun[index].username)
+                {
+                    coutAplikasi(Aplikasi[idx].id, Aplikasi[idx].name, Aplikasi[idx].harga, Aplikasi[idx].seller, Aplikasi[idx].status, "penjual");
+                    cout << "Edit == 1 || Hapus == 2 || Keluar == 3" << endl;
+                    getInputint("Pilihan: ", &pilihanOption, "1");
+                    switch (pilihanOption)
+                    {
+                    case 1:
+                        editAplikasi(jumlahAplikasi, index);
+                        break;
+                    case 2:
+                        hapusAplikasi(jumlahAplikasi, index);
+                        break;
+                    case 3:
+                        cout << "Keluar dari menu searching aplikasi" << endl;
+                        break;
+                    default:
+                        cout << "Pilihan tidak ditemukan" << endl;
+                        break;
+                    }
+                }
+                else
+                {
+                    cout << "Aplikasi tidak ditemukan!" << endl;
+                }
+            }
+            else
+            {
+                cout << "Aplikasi tidak ditemukan!" << endl;
+            }
+            enter(1);
+            break;
+        case 8:
             cout << "Logout" << endl;
             break;
         default:
             cout << "Pilihan tidak ditemukan" << endl;
             break;
         }
-    } while (pilihan != 7);
+    } while (pilihan != 8);
 }
 
 void isiSaldo(int &jumlahAkun, int index)
@@ -1218,6 +1263,29 @@ void sortAplikasi(string role, int &jumlahAplikasi, string sortBy, string mode, 
             break;
         }
     }
+}
+
+int binarySearchApp(Item data[], int jumlahData, string cari)
+{
+    int kiri = 0, kanan = jumlahData - 1;
+    while (kiri <= kanan)
+    {
+        int tengah = (kiri + kanan) / 2;
+        if (data[tengah].name == cari)
+        {
+            return tengah;
+            break;
+        }
+        else if (data[tengah].name < cari)
+        {
+            kiri = tengah + 1;
+        }
+        else
+        {
+            kanan = tengah - 1;
+        }
+    }
+    return -1;
 }
 
 void menuSorting(int &jumlahAplikasi, int jumlahReview, int index, string role, int &jumlahTransaksi, int &jumlahAkun)
