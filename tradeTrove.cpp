@@ -431,7 +431,7 @@ void lihatRequestAkun(int &jumlahAkun)
                 break;
             }
             cout << "Status : Belum dikonfirmasi" << endl;
-            cout << "________________________________________\n";
+            cout << "________________________________________\n\n";
             found = true;
         }
     }
@@ -500,7 +500,7 @@ void lihatPengguna(int &jumlahAkun)
         {
             cout << " Status : Belum dikonfirmasi" << endl;
         }
-        cout << "________________________________________\n";
+        cout << "________________________________________\n\n";
     }
 }
 
@@ -539,10 +539,6 @@ void hapusAkun(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview)
                         Aplikasi[k] = Aplikasi[k + 1];
                     }
                     jumlahAplikasi--;
-                    for (int k = j; k < jumlahAplikasi; k++)
-                    {
-                        Aplikasi[k].id = k + 1;
-                    }
                     for (int k = 0; k < jumlahReview;)
                     {
                         if (daftarReview[k].idAplikasi == idAplikasi)
@@ -696,7 +692,15 @@ void tambahAplikasi(int &jumlahAplikasi, int index)
     getlineInput("Nama Aplikasi : ", &nama);
     cout << "Harga Aplikasi : ";
     cin >> harga;
-    Aplikasi[jumlahAplikasi].id = (jumlahAplikasi == 0) ? 1 : Aplikasi[jumlahAplikasi - 1].id + 1;
+    getInputint("Input ID Unik Untuk Aplikasi : ", &Aplikasi[jumlahAplikasi].id, "1");
+    for (int i=0 ; i< jumlahAplikasi; i++){
+        if (Aplikasi[i].id == Aplikasi[jumlahAplikasi].id){
+            system("cls || clear");
+            cout << "ID sudah digunakan, silahkan input ulang" << endl;
+            tambahAplikasi(jumlahAplikasi, index);
+            return;
+        }
+    }
     Aplikasi[jumlahAplikasi].name = nama;
     Aplikasi[jumlahAplikasi].harga = harga;
     Aplikasi[jumlahAplikasi].seller = Akun[index].username;
@@ -722,7 +726,7 @@ void coutAplikasi(int id, string name, double harga, string seller, bool status,
         {
             cout << "Status : Belum dikonfirmasi" << endl;
         }
-        cout << "________________________________________\n";
+        cout << "________________________________________\n\n";
     }
 }
 
@@ -1136,7 +1140,7 @@ void beliAplikasi(int &jumlahAplikasi, int index, int &jumlahTransaksi, int &jum
     }
 }
 
-void tambahReview(int &jumlahReview, int &jumlahTransaksi, int index)
+void tambahReview(int &jumlahReview, int &jumlahTransaksi, int index, int &jumlahAplikasi)
 {
     int idApp;
     getInputint("Masukkan ID aplikasi yang ingin direview (Ketik 0 untuk keluar): ", &idApp, "2");
@@ -1144,6 +1148,13 @@ void tambahReview(int &jumlahReview, int &jumlahTransaksi, int index)
     {
         cout << "Keluar dari menu review aplikasi" << endl;
         return;
+    }
+    for (int i=0 ; i< jumlahAplikasi; i++){
+        if (Aplikasi[i].id != Aplikasi[jumlahAplikasi].id){
+            system("cls || clear");
+            cout << "Aplikasi Sudah Dihapus" << endl;
+            return;
+        }
     }
     bool found = false;
     for (int i = 0; i < jumlahTransaksi; i++)
@@ -1396,7 +1407,7 @@ void menuPembeli(int &jumlahAkun, int &jumlahAplikasi, int index, int &jumlahRev
             cout << "         Review Aplikasi" << endl;
             cout << "=====================================\n";
             daftarTransaksiAplikasi(jumlahTransaksi, index, "pembeli");
-            tambahReview(jumlahReview, jumlahTransaksi, index);
+            tambahReview(jumlahReview, jumlahTransaksi, index, jumlahAplikasi);
             enter(1);
             break;
         case 6:
