@@ -213,8 +213,6 @@ int bacaTransaksi()
         stringstream ss(line);
         ss >> daftarTransaksi[jumlahTransaksi].id;
         ss.ignore();
-        ss >> daftarTransaksi[jumlahTransaksi].idPembeli;
-        ss.ignore();
         ss >> daftarTransaksi[jumlahTransaksi].status;
         ss.ignore();
         ss >> daftarTransaksi[jumlahTransaksi].aplikasi.id;
@@ -285,7 +283,7 @@ void saveTransaksi(int &jumlahTransaksi)
     }
     for (int i = 0; i < jumlahTransaksi; i++)
     {
-        fileTransaksi << daftarTransaksi[i].id << "," << daftarTransaksi[i].idPembeli << "," << daftarTransaksi[i].status << "," << daftarTransaksi[i].aplikasi.id << "," << daftarTransaksi[i].aplikasi.name << "," << daftarTransaksi[i].aplikasi.harga << "," << daftarTransaksi[i].aplikasi.seller << "," << daftarTransaksi[i].usernamePembeli << endl;
+        fileTransaksi << daftarTransaksi[i].id << "," << daftarTransaksi[i].status << "," << daftarTransaksi[i].aplikasi.id << "," << daftarTransaksi[i].aplikasi.name << "," << daftarTransaksi[i].aplikasi.harga << "," << daftarTransaksi[i].aplikasi.seller << "," << daftarTransaksi[i].usernamePembeli << endl;
     }
     fileTransaksi.close();
 }
@@ -738,7 +736,7 @@ void lihatAplikasi(int &jumlahAplikasi, int index, string role, string status, i
     if (role == "admin" && status == "unconfirm")
     {
         for (int i = 0; i < jumlahAplikasi; i++)
-        {
+        {   
             if (Aplikasi[i].status == false)
             {
                 coutAplikasi(Aplikasi[i].id, Aplikasi[i].name, Aplikasi[i].harga, Aplikasi[i].seller, Aplikasi[i].status, "penjual");
@@ -763,7 +761,7 @@ void lihatAplikasi(int &jumlahAplikasi, int index, string role, string status, i
                 coutAplikasi(Aplikasi[i].id, Aplikasi[i].name, Aplikasi[i].harga, Aplikasi[i].seller, Aplikasi[i].status, "pembeli");
                 found = true;
                 bool foundReview = false;
-                cout << "         Review" << endl;
+                cout << "\n        Review" << endl;
                 cout << "========================\n";
                 for (int j = 0; j < jumlahReview; j++)
                 {
@@ -772,7 +770,7 @@ void lihatAplikasi(int &jumlahAplikasi, int index, string role, string status, i
                         cout << "Pembeli : " << daftarReview[j].usernamePembeli << endl;
                         cout << "Rating : " << daftarReview[j].rating << endl;
                         cout << "Review : " << daftarReview[j].review << endl;
-                        cout << "========================\n";
+                        cout << "========================\n\n";
                         foundReview = true;
                     }
                 }
@@ -780,7 +778,7 @@ void lihatAplikasi(int &jumlahAplikasi, int index, string role, string status, i
                 {
                     cout << "Belum ada review untuk aplikasi ini. " << endl;
                 }
-                cout << "________________________________________\n";
+                cout << "________________________________________\n\n";
             }
         }
     }
@@ -903,7 +901,7 @@ void konfirmasiPenjualan(int &jumlahAplikasi, int index, int &jumlahTransaksi, i
                 daftarTransaksi[i].status = 2;
                 for (int j = 0; j < jumlahAkun; j++)
                 {
-                    if (daftarTransaksi[i].idPembeli == Akun[j].id)
+                    if (daftarTransaksi[i].usernamePembeli == Akun[j].username)
                     {
                         Akun[j].saldo += daftarTransaksi[i].aplikasi.harga;
                         break;
@@ -934,10 +932,10 @@ void daftarTransaksiAplikasi(int &jumlahTransaksi, int index, string role)
             cout << "Nama Pembeli : " << daftarTransaksi[i].usernamePembeli << endl;
             cout << "Nama Aplikasi : " << daftarTransaksi[i].aplikasi.name << endl;
             cout << "Status : " << "Pending" << endl;
-            cout << "________________________________________\n";
+            cout << "________________________________________\n\n";
             found = true;
         }
-        else if (daftarTransaksi[i].idPembeli == Akun[index].id && role == "pembeli")
+        else if (daftarTransaksi[i].usernamePembeli == Akun[index].username && role == "pembeli")
         {
             cout << "ID Transaksi : " << daftarTransaksi[i].id << endl;
             cout << "Nama Penjual : " << daftarTransaksi[i].aplikasi.seller << endl;
@@ -955,7 +953,7 @@ void daftarTransaksiAplikasi(int &jumlahTransaksi, int index, string role)
             {
                 cout << "Failed" << endl;
             }
-            cout << "________________________________________\n";
+            cout << "________________________________________\n\n";
             found = true;
         }
     }
@@ -1149,44 +1147,42 @@ void tambahReview(int &jumlahReview, int &jumlahTransaksi, int index, int &jumla
         cout << "Keluar dari menu review aplikasi" << endl;
         return;
     }
-    for (int i=0 ; i< jumlahAplikasi; i++){
-        if (Aplikasi[i].id != Aplikasi[jumlahAplikasi].id){
-            system("cls || clear");
-            cout << "Aplikasi Sudah Dihapus" << endl;
-            return;
-        }
-    }
     bool found = false;
     for (int i = 0; i < jumlahTransaksi; i++)
     {
-        if (daftarTransaksi[i].id == idApp && daftarTransaksi[i].status == 1 && daftarTransaksi[i].idPembeli == Akun[index].id)
+        if (daftarTransaksi[i].id == idApp && daftarTransaksi[i].status == 1 && daftarTransaksi[i].usernamePembeli == Akun[index].username)
         {
-            string review;
-            int rating;
-            cin.ignore();
-            getlineInput("Masukkan review: ", &review);
-            getInputint("Masukkan rating (1-5): ", &rating, "1");
-            while (rating < 1 || rating > 5)
-            {
-                cout << "Rating tidak valid!" << endl;
-                getInputint("Masukkan rating (1-5): ", &rating, "1");
-                system("cls || clear");
+            for (int j = 0 ; j < jumlahAplikasi; j++){
+                if (Aplikasi[j].id == daftarTransaksi[i].aplikasi.id && Aplikasi[j].name == daftarTransaksi[i].aplikasi.name){
+                    string review;
+                    int rating;
+                    cin.ignore();
+                    getlineInput("Masukkan review: ", &review);
+                    getInputint("Masukkan rating (1-5): ", &rating, "1");
+                    while (rating < 1 || rating > 5)
+                    {
+                        cout << "Rating tidak valid!" << endl;
+                        getInputint("Masukkan rating (1-5): ", &rating, "1");
+                        system("cls || clear");
+                    }
+                    daftarReview[jumlahReview].id = (jumlahReview == 0) ? 1 : daftarReview[jumlahReview - 1].id + 1;
+                    daftarReview[jumlahReview].idAplikasi = daftarTransaksi[i].aplikasi.id;
+                    daftarReview[jumlahReview].usernamePembeli = Akun[index].username;
+                    daftarReview[jumlahReview].review = review;
+                    daftarReview[jumlahReview].rating = rating;
+                    jumlahReview++;
+                    saveReview(jumlahReview);
+                    cout << "Review berhasil ditambahkan!" << endl;
+                    found = true;
+                    break;
+                }
+                
             }
-            daftarReview[jumlahReview].id = (jumlahReview == 0) ? 1 : daftarReview[jumlahReview - 1].id + 1;
-            daftarReview[jumlahReview].idAplikasi = daftarTransaksi[i].aplikasi.id;
-            daftarReview[jumlahReview].usernamePembeli = Akun[index].username;
-            daftarReview[jumlahReview].review = review;
-            daftarReview[jumlahReview].rating = rating;
-            jumlahReview++;
-            saveReview(jumlahReview);
-            cout << "Review berhasil ditambahkan!" << endl;
-            found = true;
-            break;
         }
     }
     if (!found)
     {
-        cout << "Aplikasi tidak ditemukan atau belum dikonfirmasi!" << endl;
+        cout << "Gagal! Aplikasi tidak ditemukan atau status belum disetujui" << endl;
     }
 }
 
