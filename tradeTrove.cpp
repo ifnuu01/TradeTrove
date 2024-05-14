@@ -37,7 +37,6 @@ struct review
 struct transaksi
 {
     int id;
-    int idPembeli;
     int status; // 0 = pending, 1 = success, 2 = failed
     Item aplikasi;
     string usernamePembeli;
@@ -690,6 +689,13 @@ void tambahAplikasi(int &jumlahAplikasi, int index)
     getlineInput("Nama Aplikasi : ", &nama);
     cout << "Harga Aplikasi : ";
     cin >> harga;
+    if (cin.fail() || harga <= 0)
+    {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "Input tidak valid!" << endl;
+        return;
+    }
     getInputint("Input ID Unik Untuk Aplikasi : ", &Aplikasi[jumlahAplikasi].id, "1");
     for (int i=0 ; i< jumlahAplikasi; i++){
         if (Aplikasi[i].id == Aplikasi[jumlahAplikasi].id){
@@ -819,6 +825,13 @@ void editAplikasi(int &jumlahAplikasi, int index)
             getlineInput("Masukkan nama baru untuk aplikasi: ", &newName);
             cout << "Masukkan harga baru untuk aplikasi: ";
             cin >> newPrice;
+            if (cin.fail() || newPrice < 0)
+            {
+                cin.clear();
+                cin.ignore(1000, '\n');
+                cout << "Input tidak valid!" << endl;
+                return;
+            }
             Aplikasi[i].name = newName;
             Aplikasi[i].harga = newPrice;
             saveAplikasi(jumlahAplikasi);
@@ -991,11 +1004,11 @@ void menuPenjual(int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahT
         {
         case 1:
             lihatAplikasi(jumlahAplikasi, index, "penjual", "all", jumlahReview);
-            enter(1);
+            enter(1);   
             break;
         case 2:
             tambahAplikasi(jumlahAplikasi, index);
-            enter(1);
+            enter();
             break;
         case 3:
             cout << "=====================================\n";
@@ -1083,8 +1096,19 @@ void isiSaldo(int &jumlahAkun, int index)
     cout << "       Halaman Isi Saldo" << endl;
     cout << "===================================\n";
     double saldo;
-    cout << "Masukkan jumlah saldo yang ingin diisi : $";
+    cout << "Masukkan jumlah saldo yang ingin diisi (Ketik 0 untuk keluar): $";
     cin >> saldo;
+    if (cin.fail() || saldo < 0)
+    {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "Input tidak valid!" << endl;
+        return;
+    }
+    if (saldo == 0){
+        cout << "Keluar" << endl;
+        return;
+    }
     Akun[index].saldo += saldo;
     saveAkun(jumlahAkun);
     cout << "Saldo berhasil diisi!" << endl;
@@ -1112,7 +1136,6 @@ void beliAplikasi(int &jumlahAplikasi, int index, int &jumlahTransaksi, int &jum
             {
                 Akun[index].saldo -= Aplikasi[i].harga;
                 daftarTransaksi[jumlahTransaksi].id = (jumlahTransaksi == 0) ? 1 : daftarTransaksi[jumlahTransaksi - 1].id + 1;
-                daftarTransaksi[jumlahTransaksi].idPembeli = Akun[index].id;
                 daftarTransaksi[jumlahTransaksi].aplikasi.id = Aplikasi[i].id;
                 daftarTransaksi[jumlahTransaksi].aplikasi.name = Aplikasi[i].name;
                 daftarTransaksi[jumlahTransaksi].aplikasi.harga = Aplikasi[i].harga;
@@ -1384,7 +1407,7 @@ void menuPembeli(int &jumlahAkun, int &jumlahAplikasi, int index, int &jumlahRev
             break;
         case 2:
             isiSaldo(jumlahAkun, index);
-            enter(1);
+            enter();
             break;
         case 3:
             cout << "=====================================\n";
