@@ -48,7 +48,7 @@ review daftarReview[100];
 transaksi daftarTransaksi[100];
 
 void displayMainMenu(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview, int &jumlahTransaksi);
-void menuAdmin(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview);
+void menuAdmin(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview, int &jumlahTransaksi);
 void menuPenjual(int &jumlahAkun, int index, int &jumlahAplikasi, int &jumlahReview, int &jumlahTransaksi);
 void lihatAplikasi(int &jumlahAplikasi, int index, string role, string status, int &jumlahReview);
 void menuPembeli(int &jumlahAkun, int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahTransaksi);
@@ -387,7 +387,7 @@ void displayMainMenu(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview, in
                     menuPembeli(jumlahAkun, jumlahAplikasi, index, jumlahReview, jumlahTransaksi);
                     break;
                 case 3:
-                    menuAdmin(jumlahAkun, jumlahAplikasi, jumlahReview);
+                    menuAdmin(jumlahAkun, jumlahAplikasi, jumlahReview, jumlahTransaksi);
                     break;
                 default:
                     cout << "Role tidak ditemukan" << endl;
@@ -501,7 +501,7 @@ void lihatPengguna(int &jumlahAkun)
     }
 }
 
-void hapusAkun(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview)
+void hapusAkun(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview, int &jumlahTransaksi)
 {
     int id;
     getInputint("Masukkan ID akun yang ingin dihapus (Ketik 0 untuk keluar): ", &id, "2");
@@ -563,7 +563,6 @@ void hapusAkun(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview)
             }
             saveAplikasi(jumlahAplikasi);
             saveReview(jumlahReview);
-
             for (int j = 0; j < jumlahReview;)
             {
                 if (daftarReview[j].usernamePembeli == username)
@@ -584,7 +583,25 @@ void hapusAkun(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview)
                 }
             }
             saveReview(jumlahReview);
-
+            for (int k = 0; k < jumlahTransaksi;)
+            {
+                if (daftarTransaksi[k].usernamePembeli == username && !daftarTransaksi[k].status)
+                {
+                    for (int l = k; l < jumlahTransaksi - 1; l++)
+                    {
+                        daftarTransaksi[l] = daftarTransaksi[l + 1];
+                    }
+                    jumlahTransaksi--;
+                    for (int l = k; l < jumlahTransaksi; l++)
+                    {
+                        daftarTransaksi[l].id = l + 1;
+                    }
+                }
+                else
+                {
+                    k++;
+                }
+            }saveTransaksi(jumlahTransaksi);
             cout << "Akun berhasil dihapus" << endl;
             found = true;
             return;
@@ -623,7 +640,7 @@ void konfirmasiAplikasi(int &jumlahAplikasi)
     }
 }
 
-void menuAdmin(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview)
+void menuAdmin(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview, int &jumlahTransaksi)
 {
     int pilihan;
     do
@@ -665,7 +682,7 @@ void menuAdmin(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview)
             break;
         case 5:
             lihatPengguna(jumlahAkun);
-            hapusAkun(jumlahAkun, jumlahAplikasi, jumlahReview);
+            hapusAkun(jumlahAkun, jumlahAplikasi, jumlahReview, jumlahTransaksi);
             enter(1);
             break;
         case 6:
