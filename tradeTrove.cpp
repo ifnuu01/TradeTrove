@@ -53,8 +53,11 @@ void menuPenjual(int &jumlahAkun, int index, int &jumlahAplikasi, int &jumlahRev
 void lihatAplikasi(int &jumlahAplikasi, int index, string role, string status, int &jumlahReview);
 void menuPembeli(int &jumlahAkun, int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahTransaksi);
 void sortAplikasi(string role, int &jumlahAplikasi, string sortBy, string mode, int &jumlahReview, int index, int &jumlahTransaksi, int &jumlahAkun);
-void menuSorting(int &jumlahAplikasi, int jumlahReview, int index, string role, int &jumlahTransaksi, int &jumlahAkun);
+void menuSortingAplikasi(int &jumlahAplikasi, int jumlahReview, int index, string role, int &jumlahTransaksi, int &jumlahAkun);
 int binarySearchApp(Item data[], int jumlahData, string cari);
+void menuSortingPengguna(int index, int &jumlahAkun);
+void sortPengguna(string sortBy, string mode, string option,int &jumlahAkun);
+int binarySearchUsername(int jumlahData, string cari);
 
 void enter(bool ignore = 0)
 {
@@ -453,12 +456,40 @@ void konfirmasiAkun(int &jumlahAkun)
         if (Akun[i].id == idAkun && Akun[i].status == false)
         {
             Akun[i].status = true;
+            sortPengguna("id", "asc", "lihat", jumlahAkun);
             saveAkun(jumlahAkun);
             cout << "Akun berhasil dikonfirmasi" << endl;
             return;
         }
     }
     cout << "Akun tidak ditemukan atau sudah dikonfirmasi sebelumnya" << endl;
+}
+
+void coutPengguna(int id, string name, bool status, int role)
+{
+    cout << "ID : " << id << endl;
+    cout << "Username : " << name << endl;
+    switch (role)
+    {
+    case 1:
+        cout << "Role : Penjual" << endl;
+        break;
+    case 2:
+        cout << "Role : Pembeli" << endl;
+        break;
+    default:
+        cout << "Role tidak ditemukan" << endl;
+        break;
+    }
+    if (status)
+    {
+        cout << "Status : Sudah dikonfirmasi" << endl;
+    }
+    else
+    {
+        cout << "Status : Belum dikonfirmasi" << endl;
+    }
+    cout << "________________________________________\n\n";
 }
 
 void lihatPengguna(int &jumlahAkun)
@@ -472,7 +503,7 @@ void lihatPengguna(int &jumlahAkun)
     }
     for (int i = 1; i < jumlahAkun; i++)
     {
-        cout << i << " Username : " << Akun[i].username << endl;
+        cout << i << ". Username : " << Akun[i].username << endl;
         cout << " ID : " << Akun[i].id << endl;
         switch (Akun[i].role)
         {
@@ -601,7 +632,8 @@ void hapusAkun(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview, int &jum
                 {
                     k++;
                 }
-            }saveTransaksi(jumlahTransaksi);
+            }
+            saveTransaksi(jumlahTransaksi);
             cout << "Akun berhasil dihapus" << endl;
             found = true;
             return;
@@ -642,7 +674,9 @@ void konfirmasiAplikasi(int &jumlahAplikasi)
 
 void menuAdmin(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview, int &jumlahTransaksi)
 {
-    int pilihan;
+    int pilihan, index, pilihanOption;
+    string searchUsername;
+    int idx;
     do
     {
         cout << "===========================================\n";
@@ -653,7 +687,9 @@ void menuAdmin(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview, int &jum
         cout << "       3. Lihat Pengguna" << endl;
         cout << "       4. Lihat Aplikasi Penjual" << endl;
         cout << "       5. Hapus Akun Pengguna" << endl;
-        cout << "       6. Logout" << endl;
+        cout << "       6. Searching Akun Pengguna" << endl;
+        cout << "       7. Sorting Akun Pengguna" << endl;
+        cout << "       8. Logout" << endl;
         cout << "===========================================\n";
         getInputint("Pilihan : ", &pilihan, "1");
         system("cls || clear");
@@ -686,13 +722,78 @@ void menuAdmin(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview, int &jum
             enter(1);
             break;
         case 6:
+            cout << "=======================================\n";
+            cout << "       Searching Pengguna" << endl;
+            cout << "=======================================\n";
+            sortPengguna("name", "asc", "lihat", jumlahAkun);
+            lihatPengguna(jumlahAkun);
+            cin.ignore();
+            getlineInput("Masukkan nama Pengguna yang ingin dicari : ", &searchUsername);
+            idx = binarySearchUsername(jumlahAkun, searchUsername);
+            if (idx != -1)
+            {
+                coutPengguna(Akun[idx].id, Akun[idx].username, Akun[idx].status, Akun[idx].role);
+                if (!Akun[idx].status)
+                {
+                    cout << "Konfirmasi Akun == 1 || Hapus Akun == 2 || Keluar == 3" << endl;
+                    getInputint("Pilihan: ", &pilihanOption, "1");
+                    switch (pilihanOption)
+                    {
+                    case 1:
+                        konfirmasiAkun(jumlahAkun);
+                        enter(1);
+                        break;
+                    case 2:
+                        sortPengguna("id", "asc", "hapus", jumlahAkun);
+                        hapusAkun(jumlahAkun, jumlahAplikasi, jumlahReview, jumlahTransaksi);
+                        cin.ignore();
+                        break;
+                    case 3:
+                        cout << "Keluar dari menu searching akun Pengguna" << endl;
+                        break;
+                    default:
+                        cout << "Pilihan tidak ditemukan" << endl;
+                        break;
+                    }
+                }
+                else
+                {
+                    cout << "Hapus Akun == 1 || Keluar == 2" << endl;
+                    getInputint("Pilihan: ", &pilihanOption, "1");
+                    switch (pilihanOption)
+                    {
+                    case 1:
+                        sortPengguna("id", "asc", "hapus", jumlahAkun);
+                        hapusAkun(jumlahAkun, jumlahAplikasi, jumlahReview, jumlahTransaksi);
+                        cin.ignore();
+                        break;
+                    case 2:
+                        cout << "Keluar dari menu searching akun Pengguna" << endl;
+                        break;
+                    default:
+                        cout << "Pilihan tidak ditemukan" << endl;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                cout << "Username tidak ditemukan!" << endl;
+            }
+            enter(1);
+            break;
+        case 7:
+            menuSortingPengguna(index, jumlahAkun);
+            enter(1);
+            break;
+        case 8:
             cout << "Logout" << endl;
             break;
         default:
             cout << "Pilihan tidak ditemukan" << endl;
             break;
         }
-    } while (pilihan != 6);
+    } while (pilihan != 8);
 }
 
 void tambahAplikasi(int &jumlahAplikasi, int index)
@@ -714,8 +815,10 @@ void tambahAplikasi(int &jumlahAplikasi, int index)
         return;
     }
     getInputint("Input ID Unik Untuk Aplikasi : ", &Aplikasi[jumlahAplikasi].id, "1");
-    for (int i=0 ; i< jumlahAplikasi; i++){
-        if (Aplikasi[i].id == Aplikasi[jumlahAplikasi].id){
+    for (int i = 0; i < jumlahAplikasi; i++)
+    {
+        if (Aplikasi[i].id == Aplikasi[jumlahAplikasi].id)
+        {
             system("cls || clear");
             cout << "ID sudah digunakan, silahkan input ulang" << endl;
             tambahAplikasi(jumlahAplikasi, index);
@@ -759,7 +862,7 @@ void lihatAplikasi(int &jumlahAplikasi, int index, string role, string status, i
     if (role == "admin" && status == "unconfirm")
     {
         for (int i = 0; i < jumlahAplikasi; i++)
-        {   
+        {
             if (Aplikasi[i].status == false)
             {
                 coutAplikasi(Aplikasi[i].id, Aplikasi[i].name, Aplikasi[i].harga, Aplikasi[i].seller, Aplikasi[i].status, "penjual");
@@ -1021,7 +1124,7 @@ void menuPenjual(int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahT
         {
         case 1:
             lihatAplikasi(jumlahAplikasi, index, "penjual", "all", jumlahReview);
-            enter(1);   
+            enter(1);
             break;
         case 2:
             tambahAplikasi(jumlahAplikasi, index);
@@ -1052,7 +1155,7 @@ void menuPenjual(int &jumlahAplikasi, int index, int &jumlahReview, int &jumlahT
             enter(1);
             break;
         case 6:
-            menuSorting(jumlahAplikasi, jumlahReview, index, "penjual", jumlahTransaksi, jumlahAkun);
+            menuSortingAplikasi(jumlahAplikasi, jumlahReview, index, "penjual", jumlahTransaksi, jumlahAkun);
             enter(1);
             break;
         case 7:
@@ -1122,7 +1225,8 @@ void isiSaldo(int &jumlahAkun, int index)
         cout << "Input tidak valid!" << endl;
         return;
     }
-    if (saldo == 0){
+    if (saldo == 0)
+    {
         cout << "Keluar" << endl;
         return;
     }
@@ -1192,8 +1296,10 @@ void tambahReview(int &jumlahReview, int &jumlahTransaksi, int index, int &jumla
     {
         if (daftarTransaksi[i].id == idApp && daftarTransaksi[i].status == 1 && daftarTransaksi[i].usernamePembeli == Akun[index].username)
         {
-            for (int j = 0 ; j < jumlahAplikasi; j++){
-                if (Aplikasi[j].id == daftarTransaksi[i].aplikasi.id && Aplikasi[j].name == daftarTransaksi[i].aplikasi.name){
+            for (int j = 0; j < jumlahAplikasi; j++)
+            {
+                if (Aplikasi[j].id == daftarTransaksi[i].aplikasi.id && Aplikasi[j].name == daftarTransaksi[i].aplikasi.name)
+                {
                     string review;
                     int rating;
                     cin.ignore();
@@ -1216,7 +1322,6 @@ void tambahReview(int &jumlahReview, int &jumlahTransaksi, int index, int &jumla
                     found = true;
                     break;
                 }
-                
             }
         }
     }
@@ -1337,7 +1442,94 @@ int binarySearchApp(Item data[], int jumlahData, string cari)
     return -1;
 }
 
-void menuSorting(int &jumlahAplikasi, int jumlahReview, int index, string role, int &jumlahTransaksi, int &jumlahAkun)
+void sortPengguna(string sortBy, string mode, string option, int &jumlahAkun)
+{
+    if (jumlahAkun == 0)
+    {
+        return;
+    }
+    if (sortBy == "name" && mode == "asc")
+    {
+        for (int i = 0; i < jumlahAkun - 1; i++)
+        {
+            for (int j = 0; j < jumlahAkun - i - 1; j++)
+            {
+                if (Akun[j].username > Akun[j + 1].username)
+                {
+                    swap(Akun[j], Akun[j + 1]);
+                }
+            }
+        }
+    }
+    else if (sortBy == "name" && mode == "desc")
+    {
+        for (int i = 0; i < jumlahAkun - 1; i++)
+        {
+            for (int j = 0; j < jumlahAkun - i - 1; j++)
+            {
+                if (Akun[j].username < Akun[j + 1].username)
+                {
+                    swap(Akun[j], Akun[j + 1]);
+                }
+            }
+        }
+    }
+    else if (sortBy == "id" && mode == "asc")
+    {
+        for (int i = 0; i < jumlahAkun - 1; i++)
+        {
+            for (int j = 0; j < jumlahAkun - i - 1; j++)
+            {
+                if (Akun[j].id > Akun[j + 1].id)
+                {
+                    swap(Akun[j], Akun[j + 1]);
+                }
+            }
+        }
+    }
+    else if (sortBy == "id" && mode == "desc")
+    {
+        for (int i = 0; i < jumlahAkun - 1; i++)
+        {
+            for (int j = 0; j < jumlahAkun - i - 1; j++)
+            {
+                if (Akun[j].id < Akun[j + 1].id)
+                {
+                    swap(Akun[j], Akun[j + 1]);
+                }
+            }
+        }
+    }
+    if (option != "hapus")
+    {
+        lihatPengguna(jumlahAkun);
+    }
+}
+
+int binarySearchUsername(int jumlahData, string cari)
+{
+    int kiri = 0, kanan = jumlahData - 1;
+    while (kiri <= kanan)
+    {
+        int tengah = (kiri + kanan) / 2;
+        if (Akun[tengah].username == cari)
+        {
+            return tengah;
+            break;
+        }
+        else if (Akun[tengah].username < cari)
+        {
+            kiri = tengah + 1;
+        }
+        else
+        {
+            kanan = tengah - 1;
+        }
+    }
+    return -1;
+}
+
+void menuSortingAplikasi(int &jumlahAplikasi, int jumlahReview, int index, string role, int &jumlahTransaksi, int &jumlahAkun)
 {
     int pilihan;
     do
@@ -1381,6 +1573,62 @@ void menuSorting(int &jumlahAplikasi, int jumlahReview, int index, string role, 
             cout << "   Sort by Price (Mahal - Murah)" << endl;
             cout << "===================================\n";
             sortAplikasi(role, jumlahAplikasi, "price", "desc", jumlahReview, index, jumlahTransaksi, jumlahAkun);
+            enter(1);
+            break;
+        case 5:
+            cout << "Back" << endl;
+            break;
+        default:
+            cout << "Pilihan tidak ditemukan" << endl;
+            break;
+        }
+    } while (pilihan != 5);
+}
+
+void menuSortingPengguna(int index, int &jumlahAkun)
+{
+    int pilihan;
+    do
+    {
+        cout << "===================================\n";
+        cout << "         Sorting Aplikasi" << endl;
+        cout << "===================================\n";
+        cout << "       1. Sort by Name (A-Z)" << endl;
+        cout << "       2. Sort by ID (Ascending)" << endl;
+        cout << "       3. Sort by Name (Z-A)" << endl;
+        cout << "       4. Sort by ID (Descending)" << endl;
+        cout << "       5. Back" << endl;
+        cout << "===================================\n";
+        getInputint("Pilihan : ", &pilihan, "1");
+        system("cls || clear");
+        switch (pilihan)
+        {
+        case 1:
+            cout << "===================================\n";
+            cout << "       Sort by Name (A-Z)" << endl;
+            cout << "===================================\n";
+            sortPengguna("name", "asc", "lihat", jumlahAkun);
+            enter(1);
+            break;
+        case 2:
+            cout << "===================================\n";
+            cout << "   Sort by ID (Ascending)" << endl;
+            cout << "===================================\n";
+            sortPengguna("id", "asc", "lihat", jumlahAkun);
+            enter(1);
+            break;
+        case 3:
+            cout << "===================================\n";
+            cout << "       Sort by Name (Z-A)" << endl;
+            cout << "===================================\n";
+            sortPengguna("name", "dsc", "lihat", jumlahAkun);
+            enter(1);
+            break;
+        case 4:
+            cout << "===================================\n";
+            cout << "   Sort by ID (Descending)" << endl;
+            cout << "===================================\n";
+            sortPengguna("id", "dsc", "lihat",  jumlahAkun);
             enter(1);
             break;
         case 5:
@@ -1447,7 +1695,7 @@ void menuPembeli(int &jumlahAkun, int &jumlahAplikasi, int index, int &jumlahRev
             enter(1);
             break;
         case 6:
-            menuSorting(jumlahAplikasi, jumlahReview, index, "pembeli", jumlahTransaksi, jumlahAkun);
+            menuSortingAplikasi(jumlahAplikasi, jumlahReview, index, "pembeli", jumlahTransaksi, jumlahAkun);
             enter(1);
             break;
         case 7:
