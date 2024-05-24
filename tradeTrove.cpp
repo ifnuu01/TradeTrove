@@ -873,7 +873,7 @@ void coutAplikasi(int id, string name, double harga, string seller, int status, 
 {
     cout << "ID : " << id << endl;
     cout << "Nama Aplikasi : " << name << endl;
-    cout << "Harga : " << harga << endl;
+    cout << "Harga : " << harga << endl; 
     cout << "Seller : " << seller << endl;
     if (role == "penjual")
     {
