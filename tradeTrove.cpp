@@ -22,7 +22,7 @@ struct Item
     string name;
     double harga;
     string seller;
-    bool status;
+    int status;
 };
 
 struct review
@@ -670,12 +670,25 @@ void konfirmasiAplikasi(int &jumlahAplikasi)
     bool found = false;
     for (int i = 0; i < jumlahAplikasi; i++)
     {
-        if (Aplikasi[i].id == appId && !Aplikasi[i].status)
+        if (Aplikasi[i].id == appId && Aplikasi[i].status == 0)
         {
-            Aplikasi[i].status = true;
+            cout << "Success == 1 || Failed == 2" << endl;
+            int pilihan;
+            getInputint("Konfirmasi Aplikasi : ", &pilihan, "1");
+            if (pilihan == 1)
+            {
+            Aplikasi[i].status = 1;
+            }else if (pilihan == 2)
+            {
+                Aplikasi[i].status = 2;
+            }else
+            {
+                cout << "Pilihan tidak ditemukan" << endl;
+                return;
+            }
             saveAplikasi(jumlahAplikasi);
             system("cls || clear");
-            cout << "Aplikasi berhasil dikonfirmasi." << endl;
+            (pilihan == 1 || pilihan == 2) ? cout << "Aplikasi berhasil dikonfirmasi.\n" : cout << "Aplikasi di tolak\n";
             found = true;
             return;
         }
@@ -849,14 +862,14 @@ void tambahAplikasi(int &jumlahAplikasi, int index)
     Aplikasi[jumlahAplikasi].name = nama;
     Aplikasi[jumlahAplikasi].harga = harga;
     Aplikasi[jumlahAplikasi].seller = Akun[index].username;
-    Aplikasi[jumlahAplikasi].status = false;
+    Aplikasi[jumlahAplikasi].status = 0;
     jumlahAplikasi++;
     saveAplikasi(jumlahAplikasi);
     system("cls || clear");
     cout << "Aplikasi berhasil ditambahkan! Menunggu Konfirmasi" << endl;
 }
 
-void coutAplikasi(int id, string name, double harga, string seller, bool status, string role)
+void coutAplikasi(int id, string name, double harga, string seller, int status, string role)
 {
     cout << "ID : " << id << endl;
     cout << "Nama Aplikasi : " << name << endl;
@@ -864,16 +877,18 @@ void coutAplikasi(int id, string name, double harga, string seller, bool status,
     cout << "Seller : " << seller << endl;
     if (role == "penjual")
     {
-        if (status)
+        if(status == 0){
+            cout << "Status : Pending " << endl;
+        }
+        else if (status == 1)
         {
-            cout << "Status : Sudah dikonfirmasi" << endl;
+            cout << "Status : Success" << endl;
         }
         else
         {
-            cout << "Status : Belum dikonfirmasi" << endl;
+            cout << "Status : Failed" << endl;
         }
-        cout << "________________________________________\n\n";
-    }
+    }cout << "________________________________________\n\n";
 }
 
 void lihatAplikasi(int &jumlahAplikasi, int index, string role, string status, int &jumlahReview)
@@ -886,7 +901,7 @@ void lihatAplikasi(int &jumlahAplikasi, int index, string role, string status, i
     {
         for (int i = 0; i < jumlahAplikasi; i++)
         {
-            if (Aplikasi[i].status == false)
+            if (Aplikasi[i].status == 0)
             {
                 coutAplikasi(Aplikasi[i].id, Aplikasi[i].name, Aplikasi[i].harga, Aplikasi[i].seller, Aplikasi[i].status, "penjual");
                 found = true;
@@ -905,7 +920,7 @@ void lihatAplikasi(int &jumlahAplikasi, int index, string role, string status, i
     {
         for (int i = 0; i < jumlahAplikasi; i++)
         {
-            if (Aplikasi[i].status == true)
+            if (Aplikasi[i].status == 1)
             {
                 coutAplikasi(Aplikasi[i].id, Aplikasi[i].name, Aplikasi[i].harga, Aplikasi[i].seller, Aplikasi[i].status, "pembeli");
                 found = true;
@@ -1278,7 +1293,7 @@ void beliAplikasi(int &jumlahAplikasi, int index, int &jumlahTransaksi, int &jum
     bool found = false;
     for (int i = 0; i < jumlahAplikasi; i++)
     {
-        if (Aplikasi[i].id == appId && Aplikasi[i].status)
+        if (Aplikasi[i].id == appId && Aplikasi[i].status == 1)
         {
             if (Akun[index].saldo >= Aplikasi[i].harga)
             {
