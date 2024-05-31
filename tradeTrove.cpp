@@ -554,7 +554,7 @@ void hapusAkun(int &jumlahAkun, int &jumlahAplikasi, int &jumlahReview, int &jum
     bool found = false;
     for (int i = 0; i < jumlahAkun; i++)
     {
-        if (Akun[i].id == id)
+        if (Akun[i].id == id && id > 1)
         {
             string username = Akun[i].username;
             for (int j = i; j < jumlahAkun - 1; j++)
